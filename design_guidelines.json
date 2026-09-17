@@ -1,0 +1,174 @@
+{
+  "project_title": "Si-Scoring Kelembagaan Perangkat Daerah Kalimantan Tengah",
+  "app_type": "dashboard (govtech multi-role SaaS web app)",
+  "language": "Indonesian (Bahasa Indonesia)",
+  "instructions_to_main_agent": "Build a high-craft Indonesian Government Institutional Evaluation & Scoring Web Application (Si-Scoring Kalteng) based on Permendagri 18/2016 & Permendagri 99/2018. Support 4 distinct role perspectives with seamless JWT session simulation: Admin, Verifikator, Penilai, and Perangkat Daerah. The design must embody modern executive govtech elegance—deep emerald slate backgrounds, gold/amber accents, high-contrast typography, and tactile data dense panels. NEVER use generic centered layouts or plain Inter headers. Ensure all interactive components have proper data-testid attributes.",
+  "UNIVERSAL GUIDELINES FOR MAIN AGENT": {
+    "anti_ai_slop_rules": [
+      "Avoid default Vercel-style blue gradients or generic centered forms.",
+      "Never use pure #000000 or #808080 - tint all neutral greys with emerald/blue tones.",
+      "Headings must use Plus Jakarta Sans or Cabinet Grotesk; body uses IBM Plex Sans.",
+      "Use 2-3x generous spacing for container cards and high-density grid layouts.",
+      "All interactive elements, inputs, buttons, filter tabs, modal triggers, and scoring sliders MUST have unique data-testid attributes in kebab-case."
+    ],
+    "hover_contrast_rule": "Always explicitly specify hover text colors. Example: hover:bg-emerald-900 hover:text-white. Hover state colors must be visually distinct and pass high contrast tests.",
+    "testing_attribute": "Every interactive and dynamic element must contain data-testid (e.g. data-testid='login-submit-button', data-testid='score-slider-var-1', data-testid='verification-approve-btn')."
+  },
+  "typography": {
+    "heading_font": "Plus Jakarta Sans, sans-serif",
+    "body_font": "IBM Plex Sans, sans-serif",
+    "mono_font": "JetBrains Mono, monospace",
+    "scale": {
+      "h1": "text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100",
+      "h2": "text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100",
+      "h3": "text-xl sm:text-2xl font-semibold text-slate-800 dark:text-slate-200",
+      "h4": "text-lg font-semibold text-slate-800 dark:text-slate-200",
+      "body": "text-sm sm:text-base text-slate-600 dark:text-slate-300 leading-relaxed",
+      "caption": "text-xs font-medium uppercase tracking-widest text-slate-500 dark:text-slate-400"
+    }
+  },
+  "colors": {
+    "archetype": "ORGANIC & EXECUTIVE GOVTECH (Kalteng Emerald & Amber Gold)",
+    "palette": {
+      "primary": "#064E3B",
+      "primary_hover": "#047857",
+      "primary_light": "#ECFDF5",
+      "accent_gold": "#D97706",
+      "accent_gold_hover": "#B45309",
+      "bg_dark": "#0B131F",
+      "bg_light": "#F8FAFC",
+      "card_dark": "#131F2E",
+      "card_light": "#FFFFFF",
+      "border_dark": "#1E293B",
+      "border_light": "#E2E8F0"
+    },
+    "maturity_levels": {
+      "sangat_rendah": {
+        "range": "11.0 - 19.0",
+        "label": "Sangat Rendah",
+        "bg": "bg-red-500/10 dark:bg-red-950/40",
+        "text": "text-red-700 dark:text-red-400",
+        "border": "border-red-500/30"
+      },
+      "rendah": {
+        "range": "19.1 - 28.0",
+        "label": "Rendah",
+        "bg": "bg-orange-500/10 dark:bg-orange-950/40",
+        "text": "text-orange-700 dark:text-orange-400",
+        "border": "border-orange-500/30"
+      },
+      "sedang": {
+        "range": "28.1 - 37.0",
+        "label": "Sedang",
+        "bg": "bg-yellow-500/10 dark:bg-yellow-950/40",
+        "text": "text-yellow-700 dark:text-yellow-400",
+        "border": "border-yellow-500/30"
+      },
+      "tinggi": {
+        "range": "37.1 - 46.0",
+        "label": "Tinggi",
+        "bg": "bg-emerald-500/10 dark:bg-emerald-950/40",
+        "text": "text-emerald-700 dark:text-emerald-400",
+        "border": "border-emerald-500/30"
+      },
+      "sangat_tinggi": {
+        "range": "46.1 - 55.0",
+        "label": "Sangat Tinggi",
+        "bg": "bg-teal-500/10 dark:bg-teal-950/40",
+        "text": "text-teal-700 dark:text-teal-300",
+        "border": "border-teal-500/30"
+      }
+    }
+  },
+  "variables_permendagri_99_2018": [
+    {"id": 1, "name": "Perencanaan Kelembagaan", "weight": "1.0", "description": "Ketersediaan dokumen RKPD/Renja & penetapan target kelembagaan."},
+    {"id": 2, "name": "Monitoring dan Pengendalian", "weight": "1.0", "description": "Sistem pemantauan pelaksanaan tugas fungsi & capaian kinerja."},
+    {"id": 3, "name": "Penjaminan Mutu Layanan", "weight": "1.0", "description": "Standar mutu pelayanan publik dan evaluasi kepuasan masyarakat."},
+    {"id": 4, "name": "Standar Operasional Prosedur (SOP)", "weight": "1.0", "description": "Kelengkapan, kebaruan, dan konsistensi penerapan SOP kerja."},
+    {"id": 5, "name": "Pendidikan dan Pelatihan", "weight": "1.0", "description": "Pengembangan kompetensi ASN dan pemenuhan jam pelajaran (JP)."},
+    {"id": 6, "name": "Analisis Kebijakan & Pemecahan Masalah", "weight": "1.0", "description": "Kajian akademis, formulasi kebijakan, dan solusi regulasi daerah."},
+    {"id": 7, "name": "Manajemen Sumber Daya Terukur", "weight": "1.0", "description": "Efisiensi alokasi anggaran, sarpras, dan optimalisasi SDM."},
+    {"id": 8, "name": "Manajemen Risiko Kelembagaan", "weight": "1.0", "description": "Peta risiko, SPIP, dan mitigasi kendala operasional kelembagaan."},
+    {"id": 9, "name": "Pengukuran Kinerja Kelembagaan", "weight": "1.0", "description": "Indikator Kinerja Utama (IKU) dan LAKIP/SAKIP perangkat daerah."},
+    {"id": 10, "name": "Pengembangan Inovasi Layanan", "weight": "1.0", "description": "Jumlah dan dampak inovasi tata kelola pemerintahan berbasis digital."},
+    {"id": 11, "name": "Budaya Organisasi", "weight": "1.0", "description": "Penerapan Core Values BerAKHLAK dan komitmen integritas kerja."}
+  ],
+  "visual_enhancers": {
+    "glassmorphism": "backdrop-blur-md bg-white/80 dark:bg-slate-900/80 border border-slate-200/50 dark:border-slate-800/50 shadow-sm",
+    "bento_grid": "grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6",
+    "status_pills": "px-3 py-1 rounded-full text-xs font-semibold tracking-wide inline-flex items-center gap-1.5",
+    "timeline_stepper": "Flex container showing step 1 (Pengajuan Document) -> step 2 (Verifikasi Verifikator) -> step 3 (Penilaian Penilai) -> step 4 (Hasil Kematangan)."
+  },
+  "roles_and_workflows": {
+    "Admin": {
+      "badge": "bg-purple-100 text-purple-800 dark:bg-purple-950 dark:text-purple-300",
+      "capabilities": [
+        "Manage users & roles (Add, Edit, Lock, Reset Pass)",
+        "Configure Permendagri 99/2018 indicators & weight variables",
+        "Set evaluation period window & lock status (max 1 month window)",
+        "Global executive dashboard & region-wise radar comparison"
+      ]
+    },
+    "Perangkat": {
+      "badge": "bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300",
+      "capabilities": [
+        "Select Area (Kabupaten/Kota in Kalimantan Tengah like Palangka Raya, Kotawaringin Barat, etc.)",
+        "Specify Device Name (e.g. Dinas Kominfo, Bappeda, Dinas Kesehatan)",
+        "Select Government Affair (Urusan)",
+        "Upload document evidence for each of 11 variables",
+        "View status timeline & rejection revision notes from Verifikator",
+        "View final maturity score report once scored"
+      ]
+    },
+    "Verifikator": {
+      "badge": "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300",
+      "capabilities": [
+        "Review uploaded evidence documents per variable",
+        "Approve verification OR reject with explicit revision notes",
+        "Rejection sends submission back to Perangkat for re-upload and restarts verification loop",
+        "Filter queue by Region, Perangkat Daerah, status"
+      ]
+    },
+    "Penilai": {
+      "badge": "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300",
+      "capabilities": [
+        "Score verified submissions only",
+        "Score each of the 11 variables on a 1.0 to 5.0 scale with qualitative notes",
+        "Auto-calculates total score (11.0 to 55.0) and assigns maturity classification",
+        "Finalize and release score to Perangkat Daerah view"
+      ]
+    }
+  },
+  "component_structure": {
+    "src/App.js": "Main layout, role context switcher / JWT login handler, navigation bar, router",
+    "src/components/Navbar.js": "Top nav with active evaluation period countdown banner, user profile, role pill, role quick switcher for demo",
+    "src/components/RoleSwitcher.js": "Quick multi-role switcher widget for testing (Admin, Verifikator, Penilai, Perangkat Daerah)",
+    "src/components/dashboards/AdminDashboard.js": "Executive overview, region heatmaps, period locking controls, user management modal, indicator manager",
+    "src/components/dashboards/PerangkatDashboard.js": "Submission creation form, 11-variable document uploader, status stepper, rejection notes alert, final report card",
+    "src/components/dashboards/VerifikatorDashboard.js": "Incoming verification queue, document previewer, approve/reject modal with mandatory feedback notes",
+    "src/components/dashboards/PenilaiDashboard.js": "Verified scoring queue, 1-5 rating sliders per variable, automated score calculation engine, submission summary",
+    "src/components/reports/MaturityReportCard.js": "Downloadable/printable formal evaluation result certificate with 11-variable radar chart and recommendations",
+    "src/components/charts/YearlyComparisonChart.js": "Recharts line/bar chart showing multi-year maturity progression for regions and devices in Central Kalimantan"
+  },
+  "image_urls": {
+    "provincial_seal": "https://images.pexels.com/photos/27627207/pexels-photo-27627207.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+    "office_eval": "https://images.unsplash.com/photo-1659718282409-203239812162?crop=entropy&cs=srgb&fm=jpg&q=85",
+    "governmental_building": "https://images.unsplash.com/photo-1787644042572-d6fdefdb29c1?crop=entropy&cs=srgb&fm=jpg&q=85"
+  },
+  "key_regions_kalteng": [
+    "Kota Palangka Raya",
+    "Kabupaten Kotawaringin Barat",
+    "Kabupaten Kotawaringin Timur",
+    "Kabupaten Kapuas",
+    "Kabupaten Barito Selatan",
+    "Kabupaten Barito Utara",
+    "Kabupaten Katingan",
+    "Kabupaten Seruyan",
+    "Kabupaten Sukamara",
+    "Kabupaten Lamandau",
+    "Kabupaten Gunung Mas",
+    "Kabupaten Pulang Pisau",
+    "Kabupaten Murung Raya",
+    "Kabupaten Barito Timur"
+  ]
+}

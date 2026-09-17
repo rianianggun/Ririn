@@ -1,0 +1,83 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=IBM+Plex+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+    margin: 0;
+    font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+.font-display {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+.font-mono {
+    font-family: 'JetBrains Mono', monospace;
+}
+
+@layer base {
+    :root {
+        --background: 210 40% 98%;
+        --foreground: 215 30% 12%;
+        --card: 0 0% 100%;
+        --card-foreground: 215 30% 12%;
+        --popover: 0 0% 100%;
+        --popover-foreground: 215 30% 12%;
+        --primary: 160 84% 20%;
+        --primary-foreground: 0 0% 100%;
+        --secondary: 210 40% 96%;
+        --secondary-foreground: 215 30% 12%;
+        --muted: 210 40% 96%;
+        --muted-foreground: 215 16% 47%;
+        --accent: 32 95% 44%;
+        --accent-foreground: 0 0% 100%;
+        --destructive: 0 72% 51%;
+        --destructive-foreground: 0 0% 100%;
+        --border: 214 32% 91%;
+        --input: 214 32% 91%;
+        --ring: 160 84% 20%;
+        --chart-1: 160 84% 25%;
+        --chart-2: 32 95% 44%;
+        --chart-3: 199 89% 48%;
+        --chart-4: 280 65% 60%;
+        --chart-5: 340 75% 55%;
+        --radius: 0.75rem;
+    }
+    .dark {
+        --background: 215 40% 8%;
+        --foreground: 210 40% 96%;
+        --card: 215 33% 13%;
+        --card-foreground: 210 40% 96%;
+        --popover: 215 33% 13%;
+        --popover-foreground: 210 40% 96%;
+        --primary: 160 70% 40%;
+        --primary-foreground: 0 0% 100%;
+        --secondary: 215 25% 20%;
+        --secondary-foreground: 210 40% 96%;
+        --muted: 215 25% 20%;
+        --muted-foreground: 215 20% 65%;
+        --accent: 32 95% 50%;
+        --accent-foreground: 0 0% 10%;
+        --destructive: 0 62% 45%;
+        --destructive-foreground: 0 0% 100%;
+        --border: 215 25% 22%;
+        --input: 215 25% 22%;
+        --ring: 160 70% 40%;
+    }
+}
+
+@layer base {
+    * {
+        @apply border-border;
+    }
+    body {
+        @apply bg-background text-foreground;
+    }
+    h1, h2, h3, h4 {
+        font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+}

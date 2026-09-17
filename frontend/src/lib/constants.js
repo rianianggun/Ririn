@@ -1,0 +1,78 @@
+export const REGIONS = [
+  "Kota Palangka Raya",
+  "Kabupaten Kotawaringin Barat",
+  "Kabupaten Kotawaringin Timur",
+  "Kabupaten Kapuas",
+  "Kabupaten Barito Selatan",
+  "Kabupaten Barito Utara",
+  "Kabupaten Katingan",
+  "Kabupaten Seruyan",
+  "Kabupaten Sukamara",
+  "Kabupaten Lamandau",
+  "Kabupaten Gunung Mas",
+  "Kabupaten Pulang Pisau",
+  "Kabupaten Murung Raya",
+  "Kabupaten Barito Timur",
+];
+
+export const URUSAN = [
+  "Pendidikan",
+  "Kesehatan",
+  "Pekerjaan Umum dan Penataan Ruang",
+  "Perumahan dan Kawasan Permukiman",
+  "Ketenteraman, Ketertiban Umum, dan Pelindungan Masyarakat",
+  "Sosial",
+  "Tenaga Kerja",
+  "Pemberdayaan Perempuan dan Perlindungan Anak",
+  "Pangan",
+  "Pertanahan",
+  "Lingkungan Hidup",
+  "Administrasi Kependudukan dan Pencatatan Sipil",
+  "Pemberdayaan Masyarakat dan Desa",
+  "Pengendalian Penduduk dan Keluarga Berencana",
+  "Perhubungan",
+  "Komunikasi dan Informatika",
+  "Koperasi, Usaha Kecil, dan Menengah",
+  "Penanaman Modal",
+  "Kepemudaan dan Olahraga",
+  "Statistik",
+  "Persandian",
+  "Kebudayaan",
+  "Perpustakaan",
+  "Kearsipan",
+  "Kelautan dan Perikanan",
+  "Pariwisata",
+  "Pertanian",
+  "Kehutanan",
+  "Energi dan Sumber Daya Mineral",
+  "Perdagangan",
+  "Perindustrian",
+  "Perencanaan (Bappeda)",
+  "Keuangan (BPKAD/Bapenda)",
+  "Kepegawaian (BKPSDM)",
+  "Pengawasan (Inspektorat)",
+  "Sekretariat Daerah",
+];
+
+export const STATUS_META = {
+  draft: { label: "Draf", cls: "bg-slate-100 text-slate-700 border-slate-300", step: 0 },
+  menunggu_verifikasi: { label: "Menunggu Verifikasi", cls: "bg-amber-100 text-amber-800 border-amber-300", step: 1 },
+  ditolak: { label: "Dikembalikan (Perbaikan)", cls: "bg-red-100 text-red-700 border-red-300", step: 1 },
+  menunggu_penilaian: { label: "Menunggu Penilaian", cls: "bg-blue-100 text-blue-800 border-blue-300", step: 2 },
+  selesai: { label: "Selesai Dinilai", cls: "bg-emerald-100 text-emerald-800 border-emerald-300", step: 3 },
+};
+
+export const MATURITY_META = {
+  sangat_rendah: { label: "Sangat Rendah", cls: "bg-red-500/10 text-red-700 border-red-500/30", hex: "#dc2626" },
+  rendah: { label: "Rendah", cls: "bg-orange-500/10 text-orange-700 border-orange-500/30", hex: "#ea580c" },
+  sedang: { label: "Sedang", cls: "bg-yellow-500/10 text-yellow-700 border-yellow-500/30", hex: "#ca8a04" },
+  tinggi: { label: "Tinggi", cls: "bg-emerald-500/10 text-emerald-700 border-emerald-500/30", hex: "#059669" },
+  sangat_tinggi: { label: "Sangat Tinggi", cls: "bg-teal-500/10 text-teal-700 border-teal-500/30", hex: "#0d9488" },
+};
+
+export const ROLE_META = {
+  admin: { label: "Administrator", cls: "bg-purple-100 text-purple-800 border-purple-300" },
+  perangkat: { label: "Perangkat Daerah", cls: "bg-blue-100 text-blue-800 border-blue-300" },
+  verifikator: { label: "Verifikator", cls: "bg-amber-100 text-amber-800 border-amber-300" },
+  penilai: { label: "Penilai", cls: "bg-emerald-100 text-emerald-800 border-emerald-300" },
+};
