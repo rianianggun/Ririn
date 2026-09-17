@@ -462,8 +462,9 @@ async def score_submission(sid: str, input: ScoreInput, user: dict = Depends(req
         raise HTTPException(status_code=403, detail="Pengajuan belum terverifikasi")
     indicators = await db.indicators.find({}, {"_id": 0}).to_list(1000)
     ind_map = {str(i["id"]): i for i in indicators}
-    if len(input.scores) != len(indicators):
-        raise HTTPException(status_code=400, detail="Semua variabel harus dinilai")
+    submitted_ids = {item.indicator_id for item in input.scores}
+    if len(submitted_ids) != len(indicators) or submitted_ids != set(ind_map.keys()):
+        raise HTTPException(status_code=400, detail="Semua variabel harus dinilai tepat satu kali")
     total = 0.0
     weighted = 0.0
     weight_sum = 0.0
