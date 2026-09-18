@@ -1,0 +1,28 @@
+{
+  "summary": "Iteration 2 - Retested PP 18/2016 model end-to-end. Deleted the obsolete v1 pytest file (test_e2e_scoring.py, 11-indicator model) and rewrote it as test_pp18_e2e.py. Backend: 11/11 pytest passing covering login (4 roles) + invalid login (422 mapped to expected), indicators seeded (3 umum + N teknis per urusan), sub-urusan handling for Trantibumlinmas, full workflow (create -> submit-before-upload=400 -> upload -> submit -> reject with note -> resubmit -> approve -> score -> umum/teknis avg), reject-without-note validation, perangkat cannot verify (403), reports preview+save+excel download (final=880 Tipe A ×1.1), perangkat sees own-area reports, stats endpoints for all roles, audit admin-only. Frontend UI smoke via Playwright: login for all 4 roles works, urusan select renders 32 options, sub-urusan dropdown hidden for Bidang Pendidikan but visible for Bidang Ketentraman Trantibumlinmas (conditional dropdown correct), perangkat new-submission dialog fully functional, verifikator sees 3 queue items (area-scoped), penilai tab-laporan renders area/device/multiplier/preview controls and preview table renders after selection, admin sees all 4 tabs (users/indicators/periods/audit), notification bell visible, period-lock button present, indicators filters (level/urusan) work with add-teknis-btn, audit tab renders entries. No console errors observed.",
+  "backend_issues": { "critical": [], "minor": [] },
+  "frontend_issues": { "ui_bugs": [], "integration_issues": [], "design_issues": [] },
+  "test_report_links": [
+    "/app/backend/tests/test_pp18_e2e.py",
+    "/app/backend/tests/e2e_pp18.py",
+    "/app/test_reports/pytest/pytest_results.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "Invalid-login endpoint returns HTTP 422 (Pydantic email validation) for malformed emails; consider catching and returning 401 uniformly so the client sees the same error class for all bad credentials.",
+    "score_submission still does not validate uniqueness of indicator_ids in the payload - a penilai could submit duplicate scores for the same indicator and pass; low risk but worth guarding.",
+    "seed() only inserts demo users when missing; if the admin later changes a demo password in DB, credential file will drift silently - consider idempotent password reset in seed for the demo trio like admin.",
+    "check_upload_allowed compares dates via string comparison on YYYY-MM-DD; works but a proper date parse would also gate start_date (currently uploads are allowed before start_date).",
+    "CORS still uses only FRONTEND_URL origin; CORS_ORIGINS env variable is declared but unused - dead config."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_pp18_e2e.py",
+    "/app/backend/tests/test_e2e_scoring.py (deleted - obsolete v1)"
+  ],
+  "success_rate": { "backend": "100% (11/11 pytest)", "frontend": "100% smoke (all roles, all main flows, conditional sub-urusan, reports preview, admin tabs)" },
+  "test_credentials": "Used credentials from /app/memory/test_credentials.md - all 4 roles verified working via both API and UI.",
+  "seed_data_creation": "Test creates TEST_-prefixed submissions (TEST_Dinas Pendidikan KPR, TEST_RejectNoNote, TEST_UI Dinas). Reports for TEST_ device remain in DB but are clearly prefixed.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Run `pytest backend/tests/test_pp18_e2e.py -v` for regression. The bare-curl script `backend/tests/e2e_pp18.py` is a fast smoke that also still passes. Frontend Radix Select pattern: click trigger, wait ~400ms, click [role='option']. Between role switches in Playwright always call localStorage.clear() then navigate to /login to avoid element-detached races (SPA redirects logged-in users away from /login)."
+}
