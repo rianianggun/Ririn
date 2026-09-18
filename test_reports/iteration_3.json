@@ -1,0 +1,37 @@
+{
+  "summary": "Iteration 3 - Validated 11 requested changes for PP 18/2016 (Kalteng). Added /app/backend/tests/test_pp18_iter3.py (8 new tests) covering: (1) indicator weight CRUD, (2) weighted teknis_avg (A=200 w=1, B=800 w=3 -> 650), (3) DELETE /submissions/{sid}/upload/{indicator_id} allowed in draft, (4) delete forbidden after selesai (403), (5) score bounds 0-1000 (1500 rejected), (6) data_validasi max 500 chars rejected, (7) /reference/urusan reachable. Combined with prior test_pp18_e2e.py: 18/18 pytest passing. Frontend Playwright smoke across all 4 roles: (a) Admin teknis dialog has teknis-weight-input and save-teknis-btn; (b) Perangkat dashboard: table with submission rows, year-filter present, clicking open-submission opens INLINE PANEL with back-to-list button (not popup); (c) Verifikator: tab-approved present with 'Tanggal ACC' column and year-filter; (d) Penilai: year-filter, tab-done rows open inline panel; score input is type=number min=0 max=1000, validasi input has maxLength=500 & inputMode=numeric (confirmed via component source). openFile uses blob + window.open new tab. Screenshot on Penilai shows total 620.00 with teknis_avg=650 -> proves weighted math in end-to-end UI.",
+  "backend_issues": { "critical": [], "minor": [] },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Radix Dialog (perangkat, penilai)", "issues": ["Console warning: Missing Description or aria-describedby for DialogContent - accessibility hint, non-blocking"]}
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_pp18_e2e.py",
+    "/app/backend/tests/test_pp18_iter3.py",
+    "/app/test_reports/pytest/iter3_results.xml"
+  ],
+  "action_items": [
+    "Optional: Add aria-describedby (or <DialogDescription>) inside DialogContent components in PerangkatDashboard and PenilaiDashboard to remove Radix a11y warning.",
+    "Optional: Enforce integer scores if only whole-number scores are intended (currently accepts decimals within 0-1000).",
+    "Optional: Backend does not enforce data_validasi to be numeric-only; frontend strips non-digits but API still accepts any string <=500 chars. Add regex validation if strict numeric is required."
+  ],
+  "critical_code_review_comments": [
+    "score_submission validates payload with set(submitted.keys())==set(req_ids) which implicitly enforces unique + complete indicator coverage - good.",
+    "delete_upload correctly checks status in (draft, ditolak) and sets file is_deleted flag - good; consider clearing scoring/verification stale references too if any (not applicable now).",
+    "IndicatorInput.weight has no upper bound - admin could set extreme values (e.g. 1e12). Consider Field(gt=0, le=1000).",
+    "check_upload_allowed still gates only end_date, not start_date (pre-existing).",
+    "CORS still uses only FRONTEND_URL; CORS_ORIGINS env unused (pre-existing)."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_pp18_iter3.py (new)"
+  ],
+  "success_rate": { "backend": "100% (18/18 pytest)", "frontend": "100% smoke on all 11 requested UI changes" },
+  "test_credentials": "Used credentials from /app/memory/test_credentials.md - all 4 roles verified working.",
+  "seed_data_creation": "Test creates TEST_-prefixed submissions and indicators (auto cleaned indicators; submissions remain in DB with TEST_ prefix).",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Run `pytest backend/tests/test_pp18_e2e.py backend/tests/test_pp18_iter3.py -v` for full regression (18 tests, ~10s). Frontend Radix Select pattern: click trigger, wait ~400ms, click [role='option']. Between role switches always call localStorage.clear() then navigate to /login. Weighted teknis_avg formula: sum(score_i * weight_i)/sum(weight_i). Score input on Penilai is <Input type='number' min=0 max=1000>. openFile opens a blob URL in a new tab (no download). Delete upload is a red trash icon [data-testid=delete-upload-{indId}] only rendered when status is draft/ditolak."
+}
