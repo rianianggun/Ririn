@@ -35,10 +35,14 @@ draft → menunggu_verifikasi → (ditolak → perangkat, ulang) / menunggu_peni
 - Diuji: backend 11/11 pytest, frontend smoke 100%.
 
 ## Backlog (P1/P2)
-- P1: Lengkapi indikator teknis seluruh 32 urusan × 2 level (saat ini seed contoh: Pendidikan, Kesehatan, PU, Trantibum+Kebakaran); dukung impor Excel/PDF lampiran.
 - P1: Reminder terjadwal otomatis (cron) menjelang buka/tutup periode + email.
 - P2: Validasi start_date pada jendela unggah; unifikasi error login 422→401.
 - P2: Sertifikat PDF tipologi; perbandingan multi-tahun per perangkat di grafik khusus.
+
+## Update 2026-06 (impor lampiran)
+- Fitur Impor Lampiran: Admin unggah Excel (sheet Provinsi & Kabupaten Kota) → parser mengisi indikator teknis otomatis (406 indikator, 42 urusan termasuk fungsi penunjang). Idempotent (delete-then-insert per baris).
+- Endpoint: POST /api/indicators/import, GET /api/reference/urusan (daftar urusan + sub-urusan dinamis dari DB).
+- Dropdown urusan (perangkat & admin) kini dinamis mengikuti indikator yang ada; sub-urusan otomatis (Trantibumlinmas → Ketentraman & Ketertiban Umum, Sub Urusan Kebakaran).
 
 ## Next tasks
 - Impor indikator lampiran; reminder terjadwal; lengkapi seluruh urusan.

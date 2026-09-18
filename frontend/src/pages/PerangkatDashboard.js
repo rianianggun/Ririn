@@ -25,6 +25,12 @@ export default function PerangkatDashboard() {
   const [detailIndicators, setDetailIndicators] = useState({ umum: [], teknis: [] });
   const [uploading, setUploading] = useState(null);
   const [form, setForm] = useState({ device_name: "", urusan: "", sub_urusan: "" });
+  const [urusanList, setUrusanList] = useState(URUSAN);
+  const [subMap, setSubMap] = useState(SUB_URUSAN);
+
+  useEffect(() => {
+    api.get("/reference/urusan").then((r) => { setUrusanList(r.data.urusan); setSubMap(r.data.sub_urusan); }).catch(() => {});
+  }, []);
 
   const load = useCallback(async () => {
     const [s, p, st, m] = await Promise.all([
@@ -35,7 +41,7 @@ export default function PerangkatDashboard() {
   }, []);
   useEffect(() => { load(); }, [load]);
 
-  const subUrusanOptions = SUB_URUSAN[form.urusan] || null;
+  const subUrusanOptions = subMap[form.urusan] || null;
 
   const createSubmission = async () => {
     if (!form.device_name || !form.urusan) return toast.error("Lengkapi nama perangkat & urusan");
@@ -138,7 +144,7 @@ export default function PerangkatDashboard() {
                   <Label>Urusan</Label>
                   <Select value={form.urusan} onValueChange={(v) => setForm({ ...form, urusan: v, sub_urusan: "" })}>
                     <SelectTrigger data-testid="submission-urusan-select"><SelectValue placeholder="Pilih urusan" /></SelectTrigger>
-                    <SelectContent className="max-h-72">{URUSAN.map((u) => <SelectItem key={u} value={u}>{u}</SelectItem>)}</SelectContent>
+                    <SelectContent className="max-h-72">{urusanList.map((u) => <SelectItem key={u} value={u}>{u}</SelectItem>)}</SelectContent>
                   </Select>
                 </div>
                 {subUrusanOptions && (

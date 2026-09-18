@@ -12,7 +12,7 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from ".
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "../components/ui/tabs";
 import { toast } from "sonner";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, LineChart, Line, Legend } from "recharts";
-import { Users, ListChecks, CalendarRange, LayoutDashboard, Plus, Pencil, Trash2, KeyRound, Lock, Unlock, History } from "lucide-react";
+import { Users, ListChecks, CalendarRange, LayoutDashboard, Plus, Pencil, Trash2, KeyRound, Lock, Unlock, History, Upload, Loader2 } from "lucide-react";
 
 export default function AdminDashboard() {
   const [period, setPeriod] = useState(null);
@@ -176,7 +176,28 @@ function IndicatorsTab() {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState({ name: "", description: "", order: 0 });
-  const subOpts = SUB_URUSAN[urusan] || null;
+  const [urusanList, setUrusanList] = useState(URUSAN);
+  const [subMap, setSubMap] = useState(SUB_URUSAN);
+  const [importing, setImporting] = useState(false);
+  const subOpts = subMap[urusan] || null;
+
+  const loadRef = useCallback(async () => {
+    const r = await api.get("/reference/urusan");
+    setUrusanList(r.data.urusan); setSubMap(r.data.sub_urusan);
+  }, []);
+  useEffect(() => { loadRef(); }, [loadRef]);
+
+  const doImport = async (f) => {
+    if (!f) return;
+    setImporting(true);
+    const fd = new FormData(); fd.append("file", f);
+    try {
+      const { data } = await api.post("/indicators/import", fd, { headers: { "Content-Type": "multipart/form-data" } });
+      toast.success(data.message);
+      await Promise.all([loadUmum(), loadTeknis(), loadRef()]);
+    } catch (e) { toast.error(formatApiErrorDetail(e.response?.data?.detail)); }
+    setImporting(false);
+  };
 
   const loadUmum = useCallback(async () => setUmum((await api.get("/indicators", { params: { type: "umum" } })).data), []);
   const loadTeknis = useCallback(async () => {
@@ -200,6 +221,19 @@ function IndicatorsTab() {
 
   return (
     <div className="space-y-8">
+      <div className="rounded-2xl border border-accent/30 bg-accent/5 p-5 flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <div className="font-display font-bold text-slate-900">Impor Lampiran PP 18/2016</div>
+          <div className="text-sm text-muted-foreground mt-0.5">Unggah file Excel rekap (sheet "Provinsi" & "Kabupaten Kota") untuk mengisi indikator teknis otomatis.</div>
+        </div>
+        <label>
+          <input type="file" accept=".xlsx,.xlsm" className="hidden" data-testid="import-indicators-input" onChange={(e) => doImport(e.target.files[0])} />
+          <span className="inline-flex items-center gap-2 h-10 px-4 rounded-lg bg-accent text-accent-foreground text-sm font-semibold cursor-pointer hover:bg-accent/90 transition-colors">
+            {importing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />} Impor Excel
+          </span>
+        </label>
+      </div>
+
       <div>
         <div className="font-display font-bold text-slate-900 mb-3">Faktor Umum (berlaku untuk semua urusan · bobot 20%)</div>
         <div className="space-y-2">
@@ -222,7 +256,7 @@ function IndicatorsTab() {
           </div>
           <div className="space-y-1.5"><Label>Urusan</Label>
             <Select value={urusan} onValueChange={(v) => { setUrusan(v); setSubUrusan(""); }}><SelectTrigger data-testid="ind-urusan-select"><SelectValue /></SelectTrigger>
-              <SelectContent className="max-h-72">{URUSAN.map((u) => <SelectItem key={u} value={u}>{u}</SelectItem>)}</SelectContent></Select>
+              <SelectContent className="max-h-72">{urusanList.map((u) => <SelectItem key={u} value={u}>{u}</SelectItem>)}</SelectContent></Select>
           </div>
           {subOpts && (
             <div className="space-y-1.5"><Label>Sub-Urusan</Label>

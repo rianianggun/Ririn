@@ -14,6 +14,7 @@ from pydantic import BaseModel, Field, EmailStr
 from typing import List, Optional, Dict, Any
 import uuid
 import io
+import re
 from datetime import datetime, timezone, timedelta
 import bcrypt
 import jwt
@@ -114,6 +115,88 @@ AREAS = [
     {"name": "Kota Palangka Raya", "level": "kabupaten"},
 ]
 AREA_LEVEL = {a["name"]: a["level"] for a in AREAS}
+
+URUSAN_STATIC = [
+    "Bidang Pendidikan", "Bidang Kesehatan", "Bidang Pekerjaan Umum dan Penataan Ruang",
+    "Bidang Perumahan dan Kawasan Permukiman",
+    "Bidang Ketentraman dan Ketertiban Umum serta Perlindungan Masyarakat",
+    "Bidang Sosial", "Bidang Tenaga Kerja", "Bidang Pemberdayaan Perempuan dan Perlindungan Anak",
+    "Bidang Pangan", "Bidang Pertanahan", "Bidang Lingkungan Hidup",
+    "Bidang Administrasi Kependudukan dan Pencatatan Sipil", "Bidang Pemberdayaan Masyarakat dan Desa",
+    "Bidang Pengendalian Penduduk dan Keluarga Berencana", "Bidang Perhubungan",
+    "Bidang Komunikasi dan Informatika", "Bidang Koperasi, Usaha Kecil dan Menengah",
+    "Bidang Penanaman Modal", "Bidang Kepemudaan dan Olahraga", "Bidang Statistik",
+    "Bidang Persandian", "Bidang Kebudayaan", "Bidang Perpustakaan", "Bidang Kearsipan",
+    "Bidang Kelautan dan Perikanan", "Bidang Pariwisata", "Bidang Pertanian", "Bidang Kehutanan",
+    "Bidang Energi dan Sumber Daya Mineral", "Bidang Perdagangan", "Bidang Perindustrian", "Bidang Transmigrasi",
+]
+TRANTIB = "Bidang Ketentraman dan Ketertiban Umum serta Perlindungan Masyarakat"
+
+def _norm(s):
+    s = re.sub(r'\bbidang\b', '', str(s).lower())
+    s = re.sub(r'[^a-z0-9 ]', ' ', s)
+    return re.sub(r'\s+', ' ', s).strip()
+
+URUSAN_CANON = {_norm(u): u for u in URUSAN_STATIC}
+
+def canonical_urusan(name: str):
+    n = _norm(name)
+    if "kebakaran" in n:
+        return TRANTIB, "Sub Urusan Kebakaran"
+    if "ketenteraman" in n or "ketertiban" in n:
+        return TRANTIB, "Urusan Ketentraman dan Ketertiban Umum"
+    if n in URUSAN_CANON:
+        return URUSAN_CANON[n], None
+    return name.strip(), None
+
+def parse_indicator_items(text, n):
+    text = re.sub(r'\s+', ' ', str(text)).strip()
+    marks = []
+    idx = 0
+    for k in range(1, int(n) + 1):
+        m = re.compile(r'\b' + str(k) + r'[\.\)]?\s+').search(text, idx)
+        if not m:
+            break
+        marks.append((m.start(), m.end()))
+        idx = m.end()
+    items = []
+    for i, (st, en) in enumerate(marks):
+        nxt = marks[i + 1][0] if i + 1 < len(marks) else len(text)
+        seg = text[en:nxt].strip().strip(',;.').strip()
+        if seg:
+            items.append(seg)
+    return items
+
+async def import_indicators_from_workbook(wb):
+    sheet_level = {"Provinsi": "provinsi", "Kabupaten Kota": "kabupaten", "Kabupaten/Kota": "kabupaten"}
+    inserted = 0
+    for sn in wb.sheetnames:
+        level = sheet_level.get(sn)
+        if not level:
+            continue
+        ws = wb[sn]
+        for row in ws.iter_rows(min_row=2, values_only=True):
+            if not row or len(row) < 4:
+                continue
+            kategori, name, count, daftar = row[0], row[1], row[2], row[3]
+            if not name or not daftar or not str(kategori or "").lower().startswith("faktor teknis"):
+                continue
+            try:
+                n = int(count or 0)
+            except Exception:
+                n = 0
+            items = parse_indicator_items(daftar, n) if n else []
+            if not items:
+                continue
+            urusan, sub = canonical_urusan(name)
+            await db.indicators.delete_many({"type": "teknis", "level": level, "urusan": urusan, "sub_urusan": sub})
+            for order, item in enumerate(items, start=1):
+                await db.indicators.insert_one({"id": str(uuid.uuid4()), "type": "teknis", "name": item,
+                    "description": "", "level": level, "urusan": urusan, "sub_urusan": sub,
+                    "order": order, "created_at": now_iso()})
+                inserted += 1
+    return inserted
+
 
 def tipe_from_score(v: float) -> dict:
     if v > 800: return {"key": "A", "label": "Tipe A"}
@@ -218,6 +301,37 @@ async def me(user: dict = Depends(get_current_user)):
 @api_router.get("/reference/areas")
 async def ref_areas(user: dict = Depends(get_current_user)):
     return AREAS
+
+@api_router.get("/reference/urusan")
+async def ref_urusan(user: dict = Depends(get_current_user)):
+    teknis = await db.indicators.find({"type": "teknis"}, {"_id": 0, "urusan": 1, "sub_urusan": 1}).to_list(5000)
+    present = {}
+    for t in teknis:
+        present.setdefault(t["urusan"], set())
+        if t.get("sub_urusan"):
+            present[t["urusan"]].add(t["sub_urusan"])
+    # order: static list first (those present), then extras sorted
+    ordered = [u for u in URUSAN_STATIC if u in present]
+    extras = sorted([u for u in present.keys() if u not in URUSAN_STATIC])
+    urusan_list = ordered + extras
+    if not urusan_list:
+        urusan_list = URUSAN_STATIC
+    sub_map = {u: sorted(list(s)) for u, s in present.items() if s}
+    return {"urusan": urusan_list, "sub_urusan": sub_map}
+
+@api_router.post("/indicators/import")
+async def import_indicators(file: UploadFile = File(...), user: dict = Depends(require_roles("admin"))):
+    from openpyxl import load_workbook
+    if not file.filename.lower().endswith((".xlsx", ".xlsm")):
+        raise HTTPException(status_code=400, detail="Unggah berkas Excel (.xlsx)")
+    data = await file.read()
+    try:
+        wb = load_workbook(io.BytesIO(data), data_only=True)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Gagal membaca Excel: {e}")
+    inserted = await import_indicators_from_workbook(wb)
+    ref = await ref_urusan(user)
+    return {"message": f"Impor selesai: {inserted} indikator teknis dimuat", "inserted": inserted, "urusan_count": len(ref["urusan"])}
 
 # ---------------- Users ----------------
 @api_router.get("/users")
