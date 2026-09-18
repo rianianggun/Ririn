@@ -52,11 +52,11 @@ export default function LoginPage() {
         </div>
         <div className="relative z-10 text-primary-foreground max-w-md">
           <h1 className="font-display text-4xl font-extrabold leading-tight">
-            Sistem Penilaian Kematangan Perangkat Daerah
+            Sistem Penilaian Tipologi Perangkat Daerah
           </h1>
           <p className="mt-4 text-white/80 leading-relaxed">
-            Evaluasi kelembagaan berbasis Permendagri 99/2018. Alur terverifikasi:
-            Pengajuan → Verifikasi → Penilaian → Hasil Kematangan.
+            Pemetaan urusan pemerintahan berdasarkan PP 18/2016. Alur terverifikasi:
+            Pengajuan → Verifikasi → Penilaian → Tipe A/B/C.
           </p>
           <div className="mt-8 flex flex-wrap gap-2">
             {["Perangkat", "Verifikator", "Penilai", "Admin"].map((r) => (
