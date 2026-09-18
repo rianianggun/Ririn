@@ -238,6 +238,7 @@ class IndicatorInput(BaseModel):
     level: Optional[str] = None   # provinsi | kabupaten (teknis)
     urusan: Optional[str] = None
     sub_urusan: Optional[str] = None
+    weight: float = 1.0
     order: Optional[int] = 0
 
 class PeriodInput(BaseModel):
@@ -574,6 +575,20 @@ async def download_file(file_id: str, user: dict = Depends(get_current_user)):
     return FResponse(content=data, media_type=record.get("content_type") or ct,
                      headers={"Content-Disposition": f'inline; filename="{record["original_filename"]}"'})
 
+@api_router.delete("/submissions/{sid}/upload/{indicator_id}")
+async def delete_upload(sid: str, indicator_id: str, user: dict = Depends(require_roles("perangkat"))):
+    s = await db.submissions.find_one({"id": sid})
+    if not s or s["perangkat_user_id"] != user["id"]:
+        raise HTTPException(status_code=404, detail="Pengajuan tidak ditemukan")
+    if s["status"] not in ("draft", "ditolak"):
+        raise HTTPException(status_code=403, detail="Berkas yang sudah dinilai/diproses tidak dapat dihapus")
+    up = (s.get("uploads") or {}).get(indicator_id)
+    if not up:
+        raise HTTPException(status_code=404, detail="Berkas tidak ditemukan")
+    await db.files.update_one({"id": up["file_id"]}, {"$set": {"is_deleted": True}})
+    await db.submissions.update_one({"id": sid}, {"$unset": {f"uploads.{indicator_id}": ""}, "$set": {"updated_at": now_iso()}})
+    return {"message": "Berkas dihapus"}
+
 @api_router.post("/submissions/{sid}/submit")
 async def submit_submission(sid: str, user: dict = Depends(require_roles("perangkat"))):
     s = await db.submissions.find_one({"id": sid})
@@ -622,21 +637,30 @@ async def score_submission(sid: str, input: ScoreInput, user: dict = Depends(req
     if not s: raise HTTPException(status_code=404, detail="Pengajuan tidak ditemukan")
     if s["status"] != "menunggu_penilaian": raise HTTPException(status_code=403, detail="Pengajuan belum terverifikasi")
     req_ids, umum, teknis = await required_indicator_ids(s)
-    umum_ids = {i["id"] for i in umum}; teknis_ids = {i["id"] for i in teknis}
+    umum_ids = {i["id"] for i in umum}
+    weight_map = {i["id"]: i.get("weight", 1.0) for i in teknis}
     name_map = {i["id"]: i["name"] for i in umum + teknis}
     submitted = {it.indicator_id: it for it in input.items}
     if set(submitted.keys()) != set(req_ids):
         raise HTTPException(status_code=400, detail="Semua indikator harus dinilai tepat satu kali")
     validations = {}
-    umum_scores, teknis_scores = [], []
+    umum_scores = []
+    teknis_num = teknis_den = 0.0
     for iid, it in submitted.items():
         if it.score < 0 or it.score > 1000:
             raise HTTPException(status_code=400, detail="Skor harus 0 - 1000")
+        if it.data_validasi and len(str(it.data_validasi)) > 500:
+            raise HTTPException(status_code=400, detail="Data Hasil Validasi maksimal 500 karakter")
+        w = 1.0 if iid in umum_ids else weight_map.get(iid, 1.0)
         validations[iid] = {"indicator_name": name_map.get(iid, ""), "ok": it.ok, "note": it.note,
-                            "data_validasi": it.data_validasi, "score": it.score}
-        (umum_scores if iid in umum_ids else teknis_scores).append(it.score)
+                            "data_validasi": it.data_validasi, "score": it.score, "weight": w}
+        if iid in umum_ids:
+            umum_scores.append(it.score)
+        else:
+            teknis_num += it.score * w
+            teknis_den += w
     umum_avg = round(sum(umum_scores) / len(umum_scores), 2) if umum_scores else 0
-    teknis_avg = round(sum(teknis_scores) / len(teknis_scores), 2) if teknis_scores else 0
+    teknis_avg = round(teknis_num / teknis_den, 2) if teknis_den else 0
     scoring = {"penilai_id": user["id"], "penilai_name": user["name"], "validations": validations,
                "umum_avg": umum_avg, "teknis_avg": teknis_avg, "overall_note": input.overall_note, "scored_at": now_iso()}
     hist = s.get("history", []); hist.append({"status": "selesai", "at": now_iso(), "by": user["name"]})

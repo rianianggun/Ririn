@@ -175,7 +175,7 @@ function IndicatorsTab() {
   const [teknis, setTeknis] = useState([]);
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState(null);
-  const [form, setForm] = useState({ name: "", description: "", order: 0 });
+  const [form, setForm] = useState({ name: "", description: "", order: 0, weight: 1 });
   const [urusanList, setUrusanList] = useState(URUSAN);
   const [subMap, setSubMap] = useState(SUB_URUSAN);
   const [importing, setImporting] = useState(false);
@@ -210,7 +210,7 @@ function IndicatorsTab() {
   const saveTeknis = async () => {
     if (!form.name) return toast.error("Nama indikator wajib");
     if (subOpts && !subUrusan) return toast.error("Pilih sub-urusan dahulu");
-    const payload = { type: "teknis", name: form.name, description: form.description, level, urusan, sub_urusan: subOpts ? subUrusan : null, order: form.order };
+    const payload = { type: "teknis", name: form.name, description: form.description, level, urusan, sub_urusan: subOpts ? subUrusan : null, order: form.order, weight: form.weight };
     try {
       if (editing) await api.put(`/indicators/${editing.id}`, payload); else await api.post("/indicators", payload);
       toast.success("Tersimpan"); setOpen(false); setEditing(null); setForm({ name: "", description: "", order: 0 }); await loadTeknis();
@@ -265,14 +265,14 @@ function IndicatorsTab() {
             </div>
           )}
         </div>
-        <div className="flex justify-end mb-3"><Button className="gap-2" data-testid="add-teknis-btn" onClick={() => { setEditing(null); setForm({ name: "", description: "", order: teknis.length + 1 }); setOpen(true); }}><Plus className="w-4 h-4" /> Tambah Indikator Teknis</Button></div>
+        <div className="flex justify-end mb-3"><Button className="gap-2" data-testid="add-teknis-btn" onClick={() => { setEditing(null); setForm({ name: "", description: "", order: teknis.length + 1, weight: 1 }); setOpen(true); }}><Plus className="w-4 h-4" /> Tambah Indikator Teknis</Button></div>
         <div className="space-y-2">
           {teknis.length === 0 && <div className="text-sm text-muted-foreground rounded-xl border border-dashed border-border p-6 text-center">Belum ada indikator teknis untuk kombinasi ini.</div>}
           {teknis.map((i) => (
             <div key={i.id} data-testid={`teknis-row-${i.id}`} className="rounded-xl border border-border bg-white p-4 flex items-start justify-between gap-4">
-              <div className="min-w-0"><div className="font-semibold text-slate-900">{i.order}. {i.name}</div>{i.description && <div className="text-sm text-muted-foreground mt-0.5">{i.description}</div>}</div>
+              <div className="min-w-0"><div className="font-semibold text-slate-900">{i.order}. {i.name} <span className="text-xs font-normal text-muted-foreground">(bobot {i.weight ?? 1})</span></div>{i.description && <div className="text-sm text-muted-foreground mt-0.5">{i.description}</div>}</div>
               <div className="flex gap-1 shrink-0">
-                <Button variant="ghost" size="icon" data-testid={`edit-teknis-${i.id}`} onClick={() => { setEditing(i); setForm({ name: i.name, description: i.description, order: i.order }); setOpen(true); }}><Pencil className="w-4 h-4" /></Button>
+                <Button variant="ghost" size="icon" data-testid={`edit-teknis-${i.id}`} onClick={() => { setEditing(i); setForm({ name: i.name, description: i.description, order: i.order, weight: i.weight ?? 1 }); setOpen(true); }}><Pencil className="w-4 h-4" /></Button>
                 <Button variant="ghost" size="icon" className="text-red-600" onClick={() => delTeknis(i)}><Trash2 className="w-4 h-4" /></Button>
               </div>
             </div>
@@ -287,7 +287,10 @@ function IndicatorsTab() {
           <div className="space-y-3 py-2">
             <div className="space-y-1.5"><Label>Nama Indikator</Label><Input data-testid="teknis-name-input" placeholder="mis. Jumlah satuan pendidikan..." value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} /></div>
             <div className="space-y-1.5"><Label>Deskripsi</Label><Textarea data-testid="teknis-desc-input" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={2} /></div>
-            <div className="space-y-1.5"><Label>Urutan</Label><Input type="number" data-testid="teknis-order-input" value={form.order} onChange={(e) => setForm({ ...form, order: parseInt(e.target.value) || 0 })} /></div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5"><Label>Bobot</Label><Input type="number" step="0.1" min="0.1" data-testid="teknis-weight-input" value={form.weight} onChange={(e) => setForm({ ...form, weight: parseFloat(e.target.value) || 1 })} /></div>
+              <div className="space-y-1.5"><Label>Urutan</Label><Input type="number" data-testid="teknis-order-input" value={form.order} onChange={(e) => setForm({ ...form, order: parseInt(e.target.value) || 0 })} /></div>
+            </div>
           </div>
           <DialogFooter><Button data-testid="save-teknis-btn" onClick={saveTeknis}>Simpan</Button></DialogFooter>
         </DialogContent>
